@@ -12,6 +12,8 @@ export interface EnvConfig {
 	host: string;
 	nodeEnv: "development" | "production";
 	database: DatabaseEnvConfig;
+	jwtSecret: string;
+	jwtExpiresIn: string;
 }
 
 export function loadEnvConfig(): EnvConfig {
@@ -30,6 +32,7 @@ export function loadEnvConfig(): EnvConfig {
 			name: process.env.DB_NAME || "coordi",
 			maxConnections: Number(process.env.DB_MAX_CONNECTIONS) || 10,
 		},
+		jwtSecret: process.env.JWT_SECRET || "your-secret-key-change-in-production",
+		jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
 	};
 }
-
