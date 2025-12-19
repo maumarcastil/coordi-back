@@ -10,6 +10,7 @@
       "@domain/*": ["domain/*"],
       "@application/*": ["application/*"],
       "@infrastructure/*": ["infrastructure/*"],
+      "@shared/*": ["shared/*"]
     },
     "strict": true,
     "esModuleInterop": true,
