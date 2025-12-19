@@ -8,6 +8,7 @@
 		"dev": "tsx watch --env-file=.env src/index.ts",
 		"build": "tsc",
 		"start": "node --env-file=.env dist/index.js",
+		"migrate": "tsx --env-file=.env scripts/migrate.ts",
 		"lint": "biome check src",
 		"lint:fix": "biome check --write src",
 		"format": "biome format --write src"
@@ -20,11 +21,16 @@
 		"@fastify/cors": "^11.2.0",
 		"@fastify/swagger": "^9.6.1",
 		"@fastify/swagger-ui": "^5.2.3",
+		"bcrypt": "^6.0.0",
 		"fastify": "^5.6.2",
-		"pg": "^8.16.3"
+		"jsonwebtoken": "^9.0.3",
+		"pg": "^8.16.3",
+		"zod": "^4.2.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.10",
+		"@types/bcrypt": "^6.0.0",
+		"@types/jsonwebtoken": "^9.0.10",
 		"@types/node": "^25.0.3",
 		"@types/pg": "^8.16.0",
 		"tsx": "^4.21.0",
