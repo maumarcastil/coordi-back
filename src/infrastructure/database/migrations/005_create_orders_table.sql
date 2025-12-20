@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS orders (
     total_price DECIMAL(12,2) NOT NULL,
     
     -- Tracking y estado
-    tracking_number VARCHAR(50) UNIQUE NOT NULL,
+    tracking_number VARCHAR(50) UNIQUE,
     current_status VARCHAR(20) NOT NULL DEFAULT 'pending',
     
     -- Información del remitente
