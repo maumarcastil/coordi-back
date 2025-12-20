@@ -79,3 +79,8 @@ export interface CreateOrderData {
 	packageDescription: string | null;
 	estimatedDeliveryDate: Date | null;
 }
+
+export interface OrderListItem extends Order {
+	originCityName: string;
+	destinationCityName: string;
+}
