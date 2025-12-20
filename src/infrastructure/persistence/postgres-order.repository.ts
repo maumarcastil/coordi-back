@@ -161,6 +161,30 @@ export class PostgresOrderRepository implements IOrderRepository {
 		return result.rows[0] ? this.mapToOrder(result.rows[0]) : null;
 	}
 
+	async updateStatus(id: string, status: OrderStatus): Promise<Order | null> {
+		// Determinar si necesitamos actualizar delivered_at o cancelled_at
+		let additionalFields = "";
+		const params: (string | Date)[] = [status, id];
+
+		if (status === "delivered") {
+			additionalFields = ", delivered_at = $3";
+			params.push(new Date());
+		} else if (status === "cancelled") {
+			additionalFields = ", cancelled_at = $3";
+			params.push(new Date());
+		}
+
+		const result = await this.pool.query<OrderRow>(
+			`UPDATE orders 
+			SET current_status = $1, updated_at = NOW()${additionalFields}
+			WHERE id = $2
+			RETURNING *`,
+			params,
+		);
+
+		return result.rows[0] ? this.mapToOrder(result.rows[0]) : null;
+	}
+
 	private mapToOrder(row: OrderRow): Order {
 		return {
 			id: row.id,
