@@ -15,3 +15,7 @@ export const pool = new pg.Pool({
 	database: config.database.name,
 	max: config.database.maxConnections,
 });
+
+export async function disconnectDatabase(): Promise<void> {
+	await pool.end();
+}
