@@ -84,3 +84,15 @@ export interface OrderListItem extends Order {
 	originCityName: string;
 	destinationCityName: string;
 }
+
+export interface OrderCity {
+	id: number;
+	name: string;
+	department: string;
+	code: string;
+}
+
+export interface OrderDetail extends Order {
+	originCity: OrderCity;
+	destinationCity: OrderCity;
+}
