@@ -5,6 +5,7 @@ import {
 	getOrderByIdHandler,
 	getOrderHistoryHandler,
 	getUserOrdersHandler,
+	updateOrderStatusHandler,
 } from "@infrastructure/http/controllers/order.controller.js";
 import { authMiddleware } from "@infrastructure/http/middlewares/auth.middleware.js";
 
@@ -216,5 +217,104 @@ export async function orderRoutes(app: FastifyInstance): Promise<void> {
 			},
 		},
 		handler: getOrderHistoryHandler,
+	});
+
+	// PATCH /orders/:id/status - Actualizar estado de una orden
+	app.patch("/orders/:id/status", {
+		preHandler: authMiddleware,
+		schema: {
+			description:
+				"Actualizar el estado de una orden. Los estados válidos son: pending, confirmed, in_transit, delivered, cancelled. " +
+				"Las transiciones permitidas son: pending → confirmed/cancelled, confirmed → in_transit/cancelled, in_transit → delivered/cancelled. " +
+				"Los estados 'delivered' y 'cancelled' son finales y no permiten más cambios.",
+			tags: ["Orders"],
+			security: [{ bearerAuth: [] }],
+			params: {
+				type: "object",
+				required: ["id"],
+				properties: {
+					id: {
+						type: "string",
+						pattern: uuidPattern,
+						description: "UUID de la orden a actualizar",
+					},
+				},
+			},
+			body: {
+				type: "object",
+				required: ["status"],
+				properties: {
+					status: {
+						type: "string",
+						enum: [
+							"pending",
+							"confirmed",
+							"in_transit",
+							"delivered",
+							"cancelled",
+						],
+						description:
+							"Nuevo estado de la orden. Estados: pending (Pendiente), confirmed (Confirmada), in_transit (En Tránsito), delivered (Entregada), cancelled (Cancelada)",
+					},
+					notes: {
+						type: "string",
+						maxLength: 500,
+						description:
+							"Notas opcionales sobre el cambio de estado (ej: 'Paquete salió de bodega', 'Cliente no disponible')",
+					},
+					location: {
+						type: "string",
+						maxLength: 200,
+						description:
+							"Ubicación opcional donde se realizó el cambio (ej: 'Bodega Bogotá', 'Centro de distribución Medellín')",
+					},
+				},
+			},
+			response: {
+				200: {
+					type: "object",
+					description: "Estado actualizado exitosamente",
+					properties: {
+						order: {
+							type: "object",
+							properties: {
+								id: { type: "string", format: "uuid" },
+								currentStatus: { type: "string" },
+								updatedAt: { type: "string" },
+							},
+						},
+						statusHistory: {
+							type: "object",
+							properties: {
+								id: { type: "string", format: "uuid" },
+								orderId: { type: "string", format: "uuid" },
+								status: { type: "string" },
+								notes: { type: "string", nullable: true },
+								location: { type: "string", nullable: true },
+								changedByUserId: { type: "number", nullable: true },
+								changedBySystem: { type: "boolean" },
+								createdAt: { type: "string" },
+							},
+						},
+					},
+				},
+				400: {
+					type: "object",
+					description: "Error de validación o transición de estado inválida",
+					properties: {
+						error: { type: "string" },
+						details: { type: "object" },
+					},
+				},
+				404: {
+					type: "object",
+					description: "Orden no encontrada",
+					properties: {
+						error: { type: "string" },
+					},
+				},
+			},
+		},
+		handler: updateOrderStatusHandler,
 	});
 }

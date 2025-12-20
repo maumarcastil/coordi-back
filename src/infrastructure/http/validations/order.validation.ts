@@ -38,3 +38,22 @@ export const orderIdParamSchema = z.object({
 
 export type OrderIdParam = z.infer<typeof orderIdParamSchema>;
 
+export const updateOrderStatusSchema = z.object({
+	status: z.enum(
+		["pending", "confirmed", "in_transit", "delivered", "cancelled"],
+		{
+			message:
+				"Estado inválido. Debe ser: pending, confirmed, in_transit, delivered o cancelled",
+		},
+	),
+	notes: z
+		.string()
+		.max(500, "Las notas no pueden exceder 500 caracteres")
+		.optional(),
+	location: z
+		.string()
+		.max(200, "La ubicación no puede exceder 200 caracteres")
+		.optional(),
+});
+
+export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
