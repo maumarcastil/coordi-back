@@ -190,4 +190,3 @@ export async function getOrderHistoryHandler(
 		return reply.status(500).send({ error: "Error interno del servidor" });
 	}
 }
-

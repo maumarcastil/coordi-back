@@ -82,12 +82,16 @@ export async function orderRoutes(app: FastifyInstance): Promise<void> {
 								properties: {
 									id: { type: "string", format: "uuid" },
 									quoteId: { type: "number" },
-									trackingNumber: { type: "string" },
+									trackingNumber: { type: "string", nullable: true },
 									currentStatus: { type: "string" },
 									totalPrice: { type: "number" },
 									originCityId: { type: "number" },
 									destinationCityId: { type: "number" },
-									estimatedDeliveryDate: { type: "string" },
+									originCityName: { type: "string" },
+									destinationCityName: { type: "string" },
+									senderName: { type: "string" },
+									recipientName: { type: "string" },
+									estimatedDeliveryDate: { type: "string", nullable: true },
 									createdAt: { type: "string" },
 								},
 							},
@@ -196,4 +200,3 @@ export async function orderRoutes(app: FastifyInstance): Promise<void> {
 		handler: getOrderHistoryHandler,
 	});
 }
-

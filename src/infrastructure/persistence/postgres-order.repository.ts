@@ -3,6 +3,7 @@ import type { Pool } from "pg";
 import type {
 	CreateOrderData,
 	Order,
+	OrderListItem,
 	OrderStatus,
 } from "@domain/order/order.entity.js";
 import type { IOrderRepository } from "@domain/order/order.repository.js";
@@ -34,6 +35,11 @@ interface OrderRow {
 	cancelled_at: Date | null;
 	created_at: Date;
 	updated_at: Date;
+}
+
+interface OrderListItemRow extends OrderRow {
+	origin_city_name: string;
+	destination_city_name: string;
 }
 
 export class PostgresOrderRepository implements IOrderRepository {
@@ -97,6 +103,22 @@ export class PostgresOrderRepository implements IOrderRepository {
 		return result.rows.map((row) => this.mapToOrder(row));
 	}
 
+	async findAllByUserId(userId: number): Promise<OrderListItem[]> {
+		const result = await this.pool.query<OrderListItemRow>(
+			`SELECT o.*,
+				oc.name as origin_city_name,
+				dc.name as destination_city_name
+			FROM orders o
+			JOIN cities oc ON o.origin_city_id = oc.id
+			JOIN cities dc ON o.destination_city_id = dc.id
+			WHERE o.user_id = $1
+			ORDER BY o.created_at DESC`,
+			[userId],
+		);
+
+		return result.rows.map((row) => this.mapToOrderListItem(row));
+	}
+
 	async findByQuoteId(quoteId: number): Promise<Order | null> {
 		const result = await this.pool.query<OrderRow>(
 			"SELECT * FROM orders WHERE quote_id = $1",
@@ -136,5 +158,12 @@ export class PostgresOrderRepository implements IOrderRepository {
 			updatedAt: row.updated_at,
 		};
 	}
-}
 
+	private mapToOrderListItem(row: OrderListItemRow): OrderListItem {
+		return {
+			...this.mapToOrder(row),
+			originCityName: row.origin_city_name,
+			destinationCityName: row.destination_city_name,
+		};
+	}
+}
