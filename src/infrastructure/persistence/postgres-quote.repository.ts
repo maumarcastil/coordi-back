@@ -45,12 +45,27 @@ export class PostgresQuoteRepository implements IQuoteRepository {
 	}
 
 	async findById(id: number): Promise<Quote | null> {
-		const result = await this.pool.query(
-			`SELECT * FROM quotes WHERE id = $1`,
-			[id],
-		);
+		const result = await this.pool.query(`SELECT * FROM quotes WHERE id = $1`, [
+			id,
+		]);
 
 		return result.rows[0] ? this.mapToQuote(result.rows[0]) : null;
+	}
+
+	async updateStatus(
+		id: number,
+		status: "pending" | "converted" | "expired",
+	): Promise<Quote> {
+		const result = await this.pool.query(
+			`UPDATE quotes SET status = $1 WHERE id = $2 RETURNING *`,
+			[status, id],
+		);
+
+		if (!result.rows[0]) {
+			throw new Error("Cotización no encontrada");
+		}
+
+		return this.mapToQuote(result.rows[0]);
 	}
 
 	private mapToQuote(row: {
@@ -89,4 +104,3 @@ export class PostgresQuoteRepository implements IQuoteRepository {
 		};
 	}
 }
-

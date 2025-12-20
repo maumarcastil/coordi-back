@@ -80,6 +80,9 @@ export class CreateOrderUseCase {
 			changedBySystem: true,
 		});
 
+		// Actualizar estado de la cotización a "converted"
+		await this.quoteRepository.updateStatus(quoteId, "converted");
+
 		return order;
 	}
 
