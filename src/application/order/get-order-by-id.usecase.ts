@@ -1,11 +1,11 @@
-import type { Order } from "@domain/order/order.entity.js";
+import type { OrderDetail } from "@domain/order/order.entity.js";
 import type { IOrderRepository } from "@domain/order/order.repository.js";
 
 export class GetOrderByIdUseCase {
 	constructor(private readonly orderRepository: IOrderRepository) {}
 
-	async execute(orderId: string, userId: number): Promise<Order> {
-		const order = await this.orderRepository.findById(orderId);
+	async execute(orderId: string, userId: number): Promise<OrderDetail> {
+		const order = await this.orderRepository.findByIdWithCityDetails(orderId);
 
 		if (!order) {
 			throw new Error("Orden no encontrada");
@@ -19,4 +19,3 @@ export class GetOrderByIdUseCase {
 		return order;
 	}
 }
-

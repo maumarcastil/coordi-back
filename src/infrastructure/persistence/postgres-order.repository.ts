@@ -3,6 +3,7 @@ import type { Pool } from "pg";
 import type {
 	CreateOrderData,
 	Order,
+	OrderDetail,
 	OrderListItem,
 	OrderStatus,
 } from "@domain/order/order.entity.js";
@@ -40,6 +41,17 @@ interface OrderRow {
 interface OrderListItemRow extends OrderRow {
 	origin_city_name: string;
 	destination_city_name: string;
+}
+
+interface OrderDetailRow extends OrderRow {
+	origin_city_id: number;
+	origin_city_name: string;
+	origin_city_department: string;
+	origin_city_code: string;
+	destination_city_id: number;
+	destination_city_name: string;
+	destination_city_department: string;
+	destination_city_code: string;
 }
 
 export class PostgresOrderRepository implements IOrderRepository {
@@ -92,6 +104,27 @@ export class PostgresOrderRepository implements IOrderRepository {
 		);
 
 		return result.rows[0] ? this.mapToOrder(result.rows[0]) : null;
+	}
+
+	async findByIdWithCityDetails(id: string): Promise<OrderDetail | null> {
+		const result = await this.pool.query<OrderDetailRow>(
+			`SELECT o.*,
+				oc.id as origin_city_id,
+				oc.name as origin_city_name,
+				oc.department as origin_city_department,
+				oc.code as origin_city_code,
+				dc.id as destination_city_id,
+				dc.name as destination_city_name,
+				dc.department as destination_city_department,
+				dc.code as destination_city_code
+			FROM orders o
+			JOIN cities oc ON o.origin_city_id = oc.id
+			JOIN cities dc ON o.destination_city_id = dc.id
+			WHERE o.id = $1`,
+			[id],
+		);
+
+		return result.rows[0] ? this.mapToOrderDetail(result.rows[0]) : null;
 	}
 
 	async findByUserId(userId: number): Promise<Order[]> {
@@ -164,6 +197,24 @@ export class PostgresOrderRepository implements IOrderRepository {
 			...this.mapToOrder(row),
 			originCityName: row.origin_city_name,
 			destinationCityName: row.destination_city_name,
+		};
+	}
+
+	private mapToOrderDetail(row: OrderDetailRow): OrderDetail {
+		return {
+			...this.mapToOrder(row),
+			originCity: {
+				id: row.origin_city_id,
+				name: row.origin_city_name,
+				department: row.origin_city_department,
+				code: row.origin_city_code,
+			},
+			destinationCity: {
+				id: row.destination_city_id,
+				name: row.destination_city_name,
+				department: row.destination_city_department,
+				code: row.destination_city_code,
+			},
 		};
 	}
 }
