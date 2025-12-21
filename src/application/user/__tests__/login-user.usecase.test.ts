@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LoginUserUseCase } from "../login-user.usecase.js";
-import type { IUserRepository } from "@domain/user/user.repository.js";
-import type { User } from "@domain/user/user.entity.js";
+import { createMockUserRepository, createTestUser } from "@test/mocks/index.js";
 
 // Mock external dependencies
 vi.mock("@shared/utils/hash.util.js", () => ({
@@ -14,27 +13,9 @@ vi.mock("@shared/utils/jwt.util.js", () => ({
 
 import { comparePassword } from "@shared/utils/hash.util.js";
 
-// Factory for mock repository
-const createMockUserRepository = (): IUserRepository => ({
-	create: vi.fn(),
-	findByEmail: vi.fn(),
-	findById: vi.fn(),
-});
-
-// Factory for test user
-const createTestUser = (overrides: Partial<User> = {}): User => ({
-	id: 1,
-	email: "test@example.com",
-	password: "hashed_password_here",
-	name: "Test User",
-	createdAt: new Date(),
-	updatedAt: new Date(),
-	...overrides,
-});
-
 describe("LoginUserUseCase", () => {
 	let useCase: LoginUserUseCase;
-	let mockUserRepository: IUserRepository;
+	let mockUserRepository: ReturnType<typeof createMockUserRepository>;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -61,7 +42,7 @@ describe("LoginUserUseCase", () => {
 				.execute({ email: "test@example.com", password: "wrong" })
 				.catch((e) => e.message);
 
-			// Both should have IDENTICAL error messages (prevents user enumeration)
+			// Both should have IDENTICAL error messages
 			expect(nonExistentEmailError).toBe(wrongPasswordError);
 			expect(nonExistentEmailError).toBe("Credenciales inválidas");
 		});
@@ -78,11 +59,8 @@ describe("LoginUserUseCase", () => {
 				password: "correct_password",
 			});
 
-			// Verify password is NOT in the response
 			expect(result.user).not.toHaveProperty("password");
 			expect((result.user as Record<string, unknown>).password).toBeUndefined();
-
-			// Verify other fields ARE present
 			expect(result.user.id).toBe(user.id);
 			expect(result.user.email).toBe(user.email);
 			expect(result.user.name).toBe(user.name);

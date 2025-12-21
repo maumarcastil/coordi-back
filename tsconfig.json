@@ -10,7 +10,8 @@
       "@domain/*": ["domain/*"],
       "@application/*": ["application/*"],
       "@infrastructure/*": ["infrastructure/*"],
-      "@shared/*": ["shared/*"]
+      "@shared/*": ["shared/*"],
+      "@test/*": ["__tests__/setup/*"]
     },
     "strict": true,
     "esModuleInterop": true,

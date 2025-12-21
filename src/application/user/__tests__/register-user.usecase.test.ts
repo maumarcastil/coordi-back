@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { RegisterUserUseCase } from "../register-user.usecase.js";
-import type { IUserRepository } from "@domain/user/user.repository.js";
-import type { User, CreateUserData } from "@domain/user/user.entity.js";
+import type { CreateUserData } from "@domain/user/user.entity.js";
+import { createMockUserRepository, createTestUser } from "@test/mocks/index.js";
 
 // Mock external dependencies
 vi.mock("@shared/utils/hash.util.js", () => ({
@@ -14,27 +14,9 @@ vi.mock("@shared/utils/jwt.util.js", () => ({
 
 import { hashPassword } from "@shared/utils/hash.util.js";
 
-// Factory for mock repository
-const createMockUserRepository = (): IUserRepository => ({
-	create: vi.fn(),
-	findByEmail: vi.fn(),
-	findById: vi.fn(),
-});
-
-// Factory for test user
-const createTestUser = (overrides: Partial<User> = {}): User => ({
-	id: 1,
-	email: "test@example.com",
-	password: "hashed_password",
-	name: "Test User",
-	createdAt: new Date(),
-	updatedAt: new Date(),
-	...overrides,
-});
-
 describe("RegisterUserUseCase", () => {
 	let useCase: RegisterUserUseCase;
-	let mockUserRepository: IUserRepository;
+	let mockUserRepository: ReturnType<typeof createMockUserRepository>;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -75,17 +57,12 @@ describe("RegisterUserUseCase", () => {
 				name: "New User",
 			});
 
-			// Verify hashPassword was called with plain password
 			expect(hashPassword).toHaveBeenCalledWith(plainPassword);
-
-			// Verify repository.create was called with HASHED password, not plain
 			expect(mockUserRepository.create).toHaveBeenCalledWith(
 				expect.objectContaining({
 					password: hashedPassword,
 				}),
 			);
-
-			// Verify plain password was NOT passed to repository
 			expect(mockUserRepository.create).not.toHaveBeenCalledWith(
 				expect.objectContaining({
 					password: plainPassword,
@@ -111,14 +88,10 @@ describe("RegisterUserUseCase", () => {
 				name: "New User",
 			});
 
-			// Verify password is NOT in the response
 			expect(result.user).not.toHaveProperty("password");
 			expect((result.user as Record<string, unknown>).password).toBeUndefined();
-
-			// Verify other fields ARE present
 			expect(result.user.email).toBe("new@example.com");
 			expect(result.user.name).toBe("New User");
 		});
 	});
 });
-
