@@ -2,13 +2,15 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 
 import { CreateOrderUseCase } from "@application/order/create-order.usecase.js";
 import { GetOrderByIdUseCase } from "@application/order/get-order-by-id.usecase.js";
-import { GetOrderHistoryUseCase } from "@application/order/get-order-history.usecase.js";
 import { GetUserOrdersUseCase } from "@application/order/get-user-orders.usecase.js";
+import { GetOrderHistoryUseCase } from "@application/order/get-order-history.usecase.js";
 import { UpdateOrderStatusUseCase } from "@application/order/update-order-status.usecase.js";
 
-import { PostgresOrderStatusHistoryRepository } from "@infrastructure/persistence/postgres-order-status-history.repository.js";
 import { PostgresOrderRepository } from "@infrastructure/persistence/postgres-order.repository.js";
 import { PostgresQuoteRepository } from "@infrastructure/persistence/postgres-quote.repository.js";
+import { PostgresOrderStatusHistoryRepository } from "@infrastructure/persistence/postgres-order-status-history.repository.js";
+
+import { connectionManager } from "@infrastructure/websocket/connection-manager.js";
 
 import {
 	createOrderSchema,
@@ -232,12 +234,31 @@ export async function updateOrderStatusHandler(
 			request.server.pg.pool,
 		);
 
+		// Obtener el estado anterior antes de actualizar
+		const existingOrder = await orderRepository.findById(orderId);
+		const previousStatus = existingOrder?.currentStatus;
+
 		const useCase = new UpdateOrderStatusUseCase(
 			orderRepository,
 			statusHistoryRepository,
 		);
 
 		const result = await useCase.execute(orderId, userId, bodyValidation.data);
+
+		// Notificar al usuario vía WebSocket
+		connectionManager.notifyOrderStatusChanged(userId, {
+			orderId,
+			previousStatus: previousStatus ?? "unknown",
+			currentStatus: result.order.currentStatus,
+			updatedAt: result.order.updatedAt,
+			statusHistory: {
+				id: result.statusHistory.id,
+				status: result.statusHistory.status,
+				notes: result.statusHistory.notes,
+				location: result.statusHistory.location,
+				createdAt: result.statusHistory.createdAt,
+			},
+		});
 
 		return reply.status(200).send(result);
 	} catch (error) {

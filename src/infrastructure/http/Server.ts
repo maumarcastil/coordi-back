@@ -3,8 +3,10 @@ import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import fastifyPostgres from "@fastify/postgres";
+import websocket from "@fastify/websocket";
 
 import { registerRoutes } from "./routes/index.js";
+import { registerWebSocketRoutes } from "@infrastructure/websocket/ws.routes.js";
 
 import { loadEnvConfig } from "@infrastructure/config/env.config.js";
 
@@ -49,8 +51,14 @@ export const createServer = async () => {
 		routePrefix: "/docs",
 	});
 
-	// Registrar rutas
+	// Registrar plugin WebSocket
+	await app.register(websocket);
+
+	// Registrar rutas HTTP
 	await registerRoutes(app);
+
+	// Registrar rutas WebSocket
+	await registerWebSocketRoutes(app);
 
 	return app;
 };
