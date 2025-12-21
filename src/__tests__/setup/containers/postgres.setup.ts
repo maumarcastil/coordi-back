@@ -63,18 +63,18 @@ export function getTestPool(): Pool {
 /**
  * Cleans all data from tables while preserving the schema.
  * Call this in beforeEach() to ensure test isolation.
+ * Note: cities and shipping_rates tables are NOT truncated because they contain reference/seed data.
  */
 export async function cleanDatabase(): Promise<void> {
 	if (!pool) return;
 
 	// Order matters due to foreign key constraints
+	// cities and shipping_rates are excluded because they contain seed data needed by tests
 	await pool.query(`
 		TRUNCATE TABLE 
 			order_status_history,
 			orders,
 			quotes,
-			shipping_rates,
-			cities,
 			users
 		CASCADE
 	`);
