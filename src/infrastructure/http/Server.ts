@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import fastifyPostgres from "@fastify/postgres";
+import fastifyRedis from "@fastify/redis";
 import websocket from "@fastify/websocket";
 
 import { registerRoutes } from "./routes/index.js";
@@ -26,6 +27,12 @@ export const createServer = async () => {
 		password: config.database.password,
 		database: config.database.name,
 		max: config.database.maxConnections,
+	});
+
+	await app.register(fastifyRedis, {
+		host: config.redis.host,
+		port: config.redis.port,
+		password: config.redis.password,
 	});
 
 	await app.register(swagger, {
