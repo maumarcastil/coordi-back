@@ -40,6 +40,18 @@ describe("CreateOrderUseCase", () => {
 		);
 	});
 
+	describe("Integrity: Quote existence", () => {
+		it("should reject when quote does not exist", async () => {
+			vi.mocked(mockQuoteRepository.findById).mockResolvedValue(null);
+
+			await expect(useCase.execute(100, validOrderInput)).rejects.toThrow(
+				"Cotización no encontrada",
+			);
+
+			expect(mockOrderRepository.create).not.toHaveBeenCalled();
+		});
+	});
+
 	describe("Security: Quote ownership", () => {
 		it("should reject when user tries to create order from another user's quote", async () => {
 			const quote = createTestQuote({ userId: 100 });

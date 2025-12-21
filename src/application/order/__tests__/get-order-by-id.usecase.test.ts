@@ -15,6 +15,18 @@ describe("GetOrderByIdUseCase", () => {
 		useCase = new GetOrderByIdUseCase(mockOrderRepository);
 	});
 
+	describe("Integrity: Order existence", () => {
+		it("should reject when order does not exist", async () => {
+			vi.mocked(mockOrderRepository.findByIdWithCityDetails).mockResolvedValue(
+				null,
+			);
+
+			await expect(useCase.execute("non-existent-id", 100)).rejects.toThrow(
+				"Orden no encontrada",
+			);
+		});
+	});
+
 	describe("Security: Authorization", () => {
 		it("should prevent users from accessing orders they do not own", async () => {
 			const order = createTestOrderDetail({ userId: 100 });

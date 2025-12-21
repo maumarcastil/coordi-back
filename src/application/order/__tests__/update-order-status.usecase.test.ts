@@ -29,6 +29,18 @@ describe("UpdateOrderStatusUseCase", () => {
 		);
 	});
 
+	describe("Integrity: Order existence", () => {
+		it("should reject when order does not exist", async () => {
+			vi.mocked(mockOrderRepository.findById).mockResolvedValue(null);
+
+			await expect(
+				useCase.execute("non-existent-id", 100, { status: "confirmed" }),
+			).rejects.toThrow("Orden no encontrada");
+
+			expect(mockOrderRepository.updateStatus).not.toHaveBeenCalled();
+		});
+	});
+
 	describe("State Machine: Valid transitions", () => {
 		it("should allow valid state transitions through the complete flow", async () => {
 			const userId = 100;

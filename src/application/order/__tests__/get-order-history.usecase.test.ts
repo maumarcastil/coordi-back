@@ -23,6 +23,18 @@ describe("GetOrderHistoryUseCase", () => {
 		);
 	});
 
+	describe("Integrity: Order existence", () => {
+		it("should reject when order does not exist", async () => {
+			vi.mocked(mockOrderRepository.findById).mockResolvedValue(null);
+
+			await expect(useCase.execute("non-existent-id", 100)).rejects.toThrow(
+				"Orden no encontrada",
+			);
+
+			expect(mockStatusHistoryRepository.findByOrderId).not.toHaveBeenCalled();
+		});
+	});
+
 	describe("Security: Authorization", () => {
 		it("should prevent users from viewing history of orders they do not own", async () => {
 			const order = createTestOrder({ userId: 100 });

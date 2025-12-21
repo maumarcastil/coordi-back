@@ -18,8 +18,10 @@ export default defineConfig({
 				"src/**/__tests__/**",
 				"src/types/**",
 				"src/index.ts",
+				// Pass-through use cases (sin lógica de negocio)
+				"src/application/quote/get-user-quotes.usecase.ts",
+				"src/application/order/get-user-orders.usecase.ts",
 			],
 		},
 	},
 });
-
