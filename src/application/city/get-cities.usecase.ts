@@ -8,4 +8,3 @@ export class GetCitiesUseCase {
 		return this.cityRepository.findAllActive();
 	}
 }
-
