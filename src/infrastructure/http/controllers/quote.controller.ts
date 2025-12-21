@@ -6,6 +6,8 @@ import { GetUserQuotesUseCase } from "@application/quote/get-user-quotes.usecase
 
 import { PostgresQuoteRepository } from "@infrastructure/persistence/postgres-quote.repository.js";
 import { PostgresRateRepository } from "@infrastructure/persistence/postgres-rate.repository.js";
+import { CachedRateRepository } from "@infrastructure/persistence/cached-rate.repository.js";
+import { RedisCacheService } from "@infrastructure/cache/redis-cache.service.js";
 
 import {
 	createQuoteSchema,
@@ -33,8 +35,16 @@ export async function createQuoteHandler(
 	}
 
 	try {
+		const cacheService = new RedisCacheService(request.server.redis);
 		const quoteRepository = new PostgresQuoteRepository(request.server.pg.pool);
-		const rateRepository = new PostgresRateRepository(request.server.pg.pool);
+		const postgresRateRepository = new PostgresRateRepository(
+			request.server.pg.pool,
+		);
+		const rateRepository = new CachedRateRepository(
+			postgresRateRepository,
+			cacheService,
+		);
+
 		const useCase = new CreateQuoteUseCase(quoteRepository, rateRepository);
 
 		const quote = await useCase.execute(userId, validation.data);
@@ -123,4 +133,3 @@ export async function getQuoteByIdHandler(
 		return reply.status(500).send({ error: "Error interno del servidor" });
 	}
 }
-
