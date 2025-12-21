@@ -28,6 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_shipping_rates_city_b ON shipping_rates(city_b_id
 CREATE INDEX IF NOT EXISTS idx_shipping_rates_active ON shipping_rates(is_active) WHERE is_active = true;
 
 -- Trigger para actualizar updated_at automáticamente
+DROP TRIGGER IF EXISTS shipping_rates_updated_at ON shipping_rates;
 CREATE TRIGGER shipping_rates_updated_at
     BEFORE UPDATE ON shipping_rates
     FOR EACH ROW
@@ -54,5 +55,6 @@ INSERT INTO shipping_rates (city_a_id, city_b_id, base_price, price_per_kg, dist
     (3, 5, 23000.00, 3100.00, 990),   -- Cali - Cartagena
     
     -- Barranquilla (4) con Cartagena (5)
-    (4, 5, 5000.00, 1200.00, 130);    -- Barranquilla - Cartagena
+    (4, 5, 5000.00, 1200.00, 130)     -- Barranquilla - Cartagena
+ON CONFLICT (city_a_id, city_b_id) DO NOTHING;
 

@@ -70,6 +70,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_origin ON orders(origin_city_id);
 CREATE INDEX IF NOT EXISTS idx_orders_destination ON orders(destination_city_id);
 
 -- Trigger para actualizar updated_at automáticamente
+DROP TRIGGER IF EXISTS orders_updated_at ON orders;
 CREATE TRIGGER orders_updated_at
     BEFORE UPDATE ON orders
     FOR EACH ROW

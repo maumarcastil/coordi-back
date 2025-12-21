@@ -16,6 +16,7 @@ CREATE INDEX IF NOT EXISTS idx_cities_code ON cities(code);
 CREATE INDEX IF NOT EXISTS idx_cities_active ON cities(is_active) WHERE is_active = true;
 
 -- Trigger para actualizar updated_at automáticamente
+DROP TRIGGER IF EXISTS cities_updated_at ON cities;
 CREATE TRIGGER cities_updated_at
     BEFORE UPDATE ON cities
     FOR EACH ROW
@@ -27,5 +28,6 @@ INSERT INTO cities (name, department, code) VALUES
     ('Medellín', 'Antioquia', 'MED'),
     ('Cali', 'Valle del Cauca', 'CLO'),
     ('Barranquilla', 'Atlántico', 'BAQ'),
-    ('Cartagena', 'Bolívar', 'CTG');
+    ('Cartagena', 'Bolívar', 'CTG')
+ON CONFLICT (code) DO NOTHING;
 
