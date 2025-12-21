@@ -8,7 +8,6 @@
 		"dev": "tsx watch --env-file=.env src/index.ts",
 		"build": "tsc",
 		"start": "node --env-file=.env dist/index.js",
-		"migrate": "tsx --env-file=.env scripts/migrate.ts",
 		"lint": "biome check src",
 		"lint:fix": "biome check --write src",
 		"format": "biome format --write src",
@@ -35,6 +34,7 @@
 		"ioredis": "^5.8.2",
 		"jsonwebtoken": "^9.0.3",
 		"pg": "^8.16.3",
+		"postgrator": "^8.0.0",
 		"zod": "^4.2.1"
 	},
 	"devDependencies": {

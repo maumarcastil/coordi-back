@@ -55,6 +55,7 @@ CREATE INDEX IF NOT EXISTS idx_quotes_origin ON quotes(origin_city_id);
 CREATE INDEX IF NOT EXISTS idx_quotes_destination ON quotes(destination_city_id);
 
 -- Trigger para actualizar updated_at automáticamente
+DROP TRIGGER IF EXISTS quotes_updated_at ON quotes;
 CREATE TRIGGER quotes_updated_at
     BEFORE UPDATE ON quotes
     FOR EACH ROW

@@ -28,10 +28,7 @@ docker compose up -d
 # Configurar variables de entorno
 cp .env.example .env
 
-# Ejecutar migraciones
-pnpm migrate
-
-# Iniciar en desarrollo
+# Iniciar en desarrollo (las migraciones se ejecutan automáticamente)
 pnpm dev
 ```
 
@@ -60,13 +57,26 @@ El servidor estará en `http://localhost:3000`
 
 | Comando | Descripción |
 |---------|-------------|
-| `pnpm dev` | Desarrollo con hot-reload |
+| `pnpm dev` | Desarrollo con hot-reload (migraciones automáticas) |
 | `pnpm build` | Compilar para producción |
 | `pnpm start` | Ejecutar en producción |
-| `pnpm migrate` | Ejecutar migraciones |
 | `pnpm lint` | Verificar código |
 | `pnpm test` | Ejecutar tests |
 | `pnpm test:coverage` | Tests con cobertura |
+
+## Arquitectura
+
+El proyecto está inspirado en **Arquitectura Hexagonal** (Ports & Adapters):
+
+```
+src/
+├── domain/          # Entidades y puertos (interfaces)
+├── application/     # Casos de uso
+├── infrastructure/  # Adaptadores (PostgreSQL, Redis, HTTP, WebSocket)
+└── shared/          # Utilidades comunes
+```
+
+El dominio define los puertos (interfaces) y la infraestructura implementa los adaptadores, manteniendo la lógica de negocio desacoplada de tecnologías externas.
 
 ## API
 

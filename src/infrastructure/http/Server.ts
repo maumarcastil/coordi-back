@@ -8,11 +8,17 @@ import websocket from "@fastify/websocket";
 
 import { registerRoutes } from "./routes/index.js";
 import { registerWebSocketRoutes } from "@infrastructure/websocket/ws.routes.js";
+import { runMigrations } from "@infrastructure/database/migrator.js";
 
 import { loadEnvConfig } from "@infrastructure/config/env.config.js";
 
 export const createServer = async () => {
 	const config = loadEnvConfig();
+
+	// Ejecutar migraciones automáticamente en desarrollo
+	if (config.nodeEnv === "development") {
+		await runMigrations();
+	}
 
 	const app = Fastify({
 		logger: true,
