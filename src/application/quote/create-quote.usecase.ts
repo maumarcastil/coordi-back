@@ -36,7 +36,7 @@ export class CreateQuoteUseCase {
 		}
 
 		// Calcular peso volumétrico (redondear hacia arriba)
-		const volumetricWeight = Math.ceil((length * width * height) / 2500);
+		const volumetricWeight = this.calculateVolumetricWeight(length, width, height);
 
 		// Peso cobrable es el mayor entre peso real y volumétrico
 		const chargeableWeight = Math.max(weight, volumetricWeight);
@@ -64,6 +64,11 @@ export class CreateQuoteUseCase {
 		});
 
 		return quote;
+	}
+
+
+	private calculateVolumetricWeight(length: number, width: number, height: number): number {
+		return Math.ceil((length * width * height) / 2500);
 	}
 }
 
